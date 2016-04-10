@@ -19,6 +19,7 @@ def go():
             os.wait_for_input()
         except KeyboardInterrupt:
             print "\n\nThank you! Have a nice day"
+            print "Exiting...\n"
             exit()
         except Exception as e:
             print e

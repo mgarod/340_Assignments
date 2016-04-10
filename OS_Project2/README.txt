@@ -7,9 +7,8 @@
 # Description:	README file for Project #2
 
 Built and tested with Python 2.7.x
-Tested on eniac.cs.hunter.cuny.edu on 3/7/16
-
-Next time, zip with “zip ARCHIVE *.py *.txt -xr __MACOSX
+Tested on eniac.cs.hunter.cuny.edu on 4/10/16
+Zipped with "zip (Archive Name) *.py *.txt -xr __MACOSX .DS_Store .localized"
 
 Build with:
 	python Main.py
