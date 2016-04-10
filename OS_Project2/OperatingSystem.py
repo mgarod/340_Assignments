@@ -9,6 +9,13 @@ Description:    Contains the OS class which simulates a single processor
                 operating system with printers, disks and CD/RW drives.
 Note:           Snapshot r will also show the contents of the CPU.
                 Raises many exceptions that will be caught in Main.py
+-------------------------------------------------------------------------------
+Update:         4/10/16
+Purpose:        Project #2
+Description:    Add history, based pre-emptive Ready Queue.
+                Add FSCAN based disk queues.
+                Add System Wide accounting information.
+                Modify Snapshots accordingly.
 """
 import collections as col
 # use append() and popleft() in order to simulate a regular queue with deque
@@ -73,7 +80,7 @@ class OS:
 
         for i in range(self.num_disks):
             d = valid.validate_pos_int(">>> Input number of cylinders for "
-                                       "disk drive "+str(i+1)+": ")
+                                       "disk drive " + str(i + 1) + ": ")
             self.Disks.append(disk.Disk(d))
 
         for i in range(self.num_cds):
@@ -186,10 +193,10 @@ class OS:
         """
         process = self.CPU.unload()
         self.load_next_process()
-        print ">>> Process terminated"
         process.terminal_accounting()
         self.total_cpu_usage += process.total_burst
         self.completed_processes += 1
+        print ">>> Process terminated"
 
     def load_next_process(self):
         if self.ReadyQueue:  # equivalent to not deque.empty()
@@ -199,7 +206,9 @@ class OS:
         """
         Command 'S': Show the state of queues of a chosen type
         Note: Only the first 16 characters of file name is displayed
+        Will also display system wide accounting information.
         """
+
         choice = valid.validate_snapshot(">>> Select r, p, d, or c: ")
         self.print_devices(choice)
 
@@ -235,6 +244,42 @@ class OS:
             row_print(9, pcb.get_avg())
             print
 
+        def row_print_disk_header():
+            row_print(7, "PID")
+            row_print(10, "Filename")
+            row_print(9, "Mem.Start")
+            row_print(4, "R/W")
+            row_print(8, "File Len")
+            row_print(9, "Cylinder")
+            row_print(7, "E.Bur")
+            row_print(7, "T.Bur")
+            row_print(7, "A.Bur")
+            print
+
+        def row_print_disk_pcb(pcb):
+            row_print(7, pcb.id)
+            row_print(10, pcb.filename[:20])
+            row_print(9, pcb.memstart)
+            row_print(4, pcb.rw)
+            row_print(8, pcb.length)
+            row_print(9, pcb.cylinder)
+            row_print(7, pcb.working_tau)
+            row_print(7, pcb.total_burst)
+            row_print(7, pcb.get_avg())
+            print
+
+        def print_os_accounting():
+            print "System Accounting---"
+            row_print(20, "  Systemwide Avg. Burst")
+            if self.completed_processes == 0:
+                row_print(25, "No completed processes")
+            else:
+                row_print(6, (self.total_cpu_usage / self.completed_processes))
+
+        # Begin Printing
+        print_os_accounting()
+        print
+        print
         if char == 'r':
             print "CPU---"
             row_print(6, "PID")
@@ -267,21 +312,47 @@ class OS:
                     print
             else:
                 print "    --"
-        else:
+        elif char == 'd':
+            i = 1
+            print "Disks---"
+            row_print_disk_header()
+            print "-" * 78
+            for d in self.devices[char]:
+                print "{0}{1} ({2} cylinders) ".format(char, i, d.max_cylinders)
+                # Print Busy Queue
+                print "  Busy Queue:"
+                if d.get_busy_queue():
+                    for p in d.get_busy_queue_iter():
+                        row_print_disk_pcb(p)
+                else:
+                    print "    --"
+
+                # Print Waiting Queue
+                print "  Waiting Queue:"
+                if d.get_waiting_queue():
+                    for p in d.get_waiting_queue_iter():
+                        row_print_disk_header(p)
+                else:
+                    print "    --"
+
+                i += 1
+        else:  # Printers and CD/RW
             row_print_header()
             i = 1
             for device_queue in self.devices[char]:
                 print "{0}{1}:".format(char, i),
                 if device_queue:  # equivalent to 'not deque.empty()'
                     offset = False
-                    # don't offset the first line because
-                    # the first line also contains device ID
                     for p in device_queue:
                         if offset is False:
                             row_print_pcb(p)
+                            if p.cylinder:
+                                print "CYLINDER {}".format(p.cylinder)
                             offset = True
                         else:
                             row_print_pcb(p, 4)
+                            if p.cylinder:
+                                print "CYLINDER {}".format(p.cylinder)
                 else:
                     print "    --"
                 i += 1
@@ -325,7 +396,7 @@ class OS:
         process = self.CPU.unload()
         process.end_burst()
         print "--- Setting Disk Information"
-        process.set_disk_process()
+        process.set_disk_process(self.Disks[num - 1].max_cylinders)
         self.Disks[num - 1].append(process)
         self.load_next_process()
 
@@ -428,8 +499,13 @@ class OS:
         :param num: Device number
         :return:
         """
-        contains_something = self.devices[char.lower()][num-1]
-        if contains_something: # true if queue contains items
+        device = self.devices[char.lower()][num - 1]
+        if char.lower() == 'd':
+            size = len(device.get_busy_queue())
+        else:
+            size = len(device)
+
+        if size > 0:  # true if queue contains items
             return True
         else:
             raise Exception("Selected device has no process in queue")

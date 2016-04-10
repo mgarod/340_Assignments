@@ -9,6 +9,11 @@ Description:    Provides necessary validation functions for the OS class
 Note:           validate_device_number() is also used to validate any
                 input to be a positive integer. Raises many exceptions that will
                 be caught in Main.py
+-------------------------------------------------------------------------------
+Update:         4/10/16
+Purpose:        Project #2
+Description:    Add validators for floats.
+                Add validator for cylinder (pos_int_less_than)
 """
 import OperatingSystem as opsys
 
@@ -163,5 +168,26 @@ def validate_pos_float(message):
             good_number = True
         except ValueError:
             print "Please input only a positive float"
+
+    return num
+
+
+def validate_pos_int_less_than(message, max):
+    good_number = False
+    num = None
+
+    while not good_number:
+        try:
+            num = int(raw_input(message))
+
+            if num <= 0:
+                raise ValueError("Please input only a positive integer")
+            elif num > max:
+                raise ValueError("Please enter a positive integer less "
+                                 "than or equal to {}".format(max))
+
+            good_number = True
+        except ValueError as e:
+            print e
 
     return num

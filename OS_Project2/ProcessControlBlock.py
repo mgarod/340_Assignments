@@ -8,6 +8,12 @@ Purpose:        Project #1
 Description:    Defines a PCB--the content of all queues in the OS class
 Note:           Makes use of valid.validate_device_number() to validate
                 that the user inputs a positive integer
+-------------------------------------------------------------------------------
+Update:         4/10/16
+Purpose:        Project #2
+Description:    Add accounting information and methods to PCB for ReadyQueue.
+                Add cylinder data to PCB for Disk.
+                Add reporting when terminated.
 """
 import Validators as valid
 
@@ -23,8 +29,7 @@ class PCB:
 
         # Accounting stuff
         self.tau_current = tau_init  # The value that will be kept for recursion
-        self.working_tau = tau_init  # The value that will be compared and
-        # reduced
+        self.working_tau = tau_init  # The value to be considered in preempting
         self.alpha = alpha
         self.current_burst = 0
         self.total_burst = 0
@@ -52,7 +57,11 @@ class PCB:
         self.rw = 'w'
         self.length = valid.validate_pos_int(">>> Length of file: ")
 
-    def set_disk_process(self):
+    def set_disk_process(self, c):
+        """
+        :param c: The maximum cylinder of the selected disk
+        :return:
+        """
         self.filename = raw_input(">>> Name of file: ")
         self.memstart = valid.validate_pos_int(">>> Starting Memory: ")
         self.rw = valid.validate_r_w(">>> Read(r) or Write(w): ")
@@ -60,7 +69,8 @@ class PCB:
             self.length = valid.validate_pos_int(">>> Length of file: ")
         else:
             self.length = "n/a"
-        self.cylinder = valid.validate_pos_int(">>> Cylinder location: ")
+        self.cylinder = \
+            valid.validate_pos_int_less_than(">>> Cylinder location: ", c)
 
     # NEW ADDITIONS IN PROJECT 2
 
@@ -96,18 +106,19 @@ class PCB:
         # Recompute: tau_current = (1-alpha)*tau_current + alpha*current_burst
         self.increment_burst()
         self.cpu_uses += 1
-        self.tau_current = (1 - self.alpha) * self.tau_current + \
-                           self.alpha * self.current_burst
+        self.tau_current = ((1 - self.alpha) * self.tau_current) + \
+                           (self.alpha * self.current_burst)
         self.working_tau = self.tau_current
         self.current_burst = 0
 
     def get_avg(self):
-        if self.cpu_uses != 0:
-            return self.total_burst / self.cpu_uses
-        else:
+        if self.cpu_uses == 0:
             return self.total_burst
+        else:
+            return self.total_burst / self.cpu_uses
 
     def terminal_accounting(self):
+        self.increment_burst()
         self.cpu_uses += 1
         print "{:>15} | {:>10}".format("PID", self.id)
         print "{:>15} | {:>10}".format("Total CPU Burst", self.total_burst)

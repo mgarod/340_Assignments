@@ -10,6 +10,8 @@ Note:           Makes use of valid.validate_device_number() to validate
                 that the user inputs a positive integer. Raises exceptions
                 that will be caught in Main.py
 """
+
+
 class CPU:
     def __init__(self):
         """
