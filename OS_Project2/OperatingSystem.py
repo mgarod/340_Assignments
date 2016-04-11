@@ -277,6 +277,7 @@ class OS:
                 row_print(6, (self.total_cpu_usage / self.completed_processes))
 
         # Begin Printing
+        print
         print_os_accounting()
         print
         print
@@ -318,7 +319,11 @@ class OS:
             row_print_disk_header()
             print "-" * 78
             for d in self.devices[char]:
-                print "{0}{1} ({2} cylinders) ".format(char, i, d.max_cylinders)
+                asc_desc = d.get_arm_direction()
+                curr_pos = d.current_position
+                max_cyl = d.max_cylinders
+                print "{0}{1}: {2} Arm at cylinder {3}  (of {4}) "\
+                    .format(char, i, asc_desc, curr_pos, max_cyl)
                 # Print Busy Queue
                 print "  Busy Queue:"
                 if d.get_busy_queue():
@@ -331,7 +336,7 @@ class OS:
                 print "  Waiting Queue:"
                 if d.get_waiting_queue():
                     for p in d.get_waiting_queue_iter():
-                        row_print_disk_header(p)
+                        row_print_disk_pcb(p)
                 else:
                     print "    --"
 
@@ -356,6 +361,8 @@ class OS:
                 else:
                     print "    --"
                 i += 1
+
+        print
 
     """ DEVICE SYSTEM CALL COMMANDS """
     def system_call(self, char, num):
@@ -427,11 +434,6 @@ class OS:
             if self.device_contains_something(char, num):
                 self.device_interrupts[char](num)
         print ">>> Device issued an interrupt"
-        # Remove process from the CPU
-        p = self.CPU.unload()
-        self.ReadyQueue.append(p)
-        self.load_next_process()
-        # Pick Logical Next
 
     def interrupt_cleanup(self, process):
         """
@@ -442,7 +444,12 @@ class OS:
         :return:
         """
         process.clear()
-        self.load_ready_queue(process)
+        if not self.CPU.empty():
+            cpu_p = self.CPU.unload()
+            cpu_p.increment_burst()
+            self.ReadyQueue.append(cpu_p)
+        self.ReadyQueue.append(process)
+        self.load_next_process()
 
     def printer_interrupt(self, num):
         """

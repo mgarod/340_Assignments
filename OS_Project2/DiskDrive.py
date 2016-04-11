@@ -66,6 +66,12 @@ class Disk:
     def get_busy_queue_iter(self):
         return self.get_busy_queue().__iter__()
 
+    def get_arm_direction(self):
+        if not self.descending:
+            return "Ascending"
+        else:
+            return "Descending"
+
     def switch_queues(self):
         self.busy_queue = ((self.busy_queue + 1) % 2)
         self.descending = not self.descending  # Alternate arm direction

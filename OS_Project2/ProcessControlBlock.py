@@ -99,11 +99,6 @@ class PCB:
 
         :return: none
         """
-        # BURST ENDS should be a function that does the following:
-        # Ask for burst, and to current_burst
-        # Add current_burst to total burst
-        # Increment CPU_uses
-        # Recompute: tau_current = (1-alpha)*tau_current + alpha*current_burst
         self.increment_burst()
         self.cpu_uses += 1
         self.tau_current = ((1 - self.alpha) * self.tau_current) + \
