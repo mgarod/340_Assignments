@@ -6,12 +6,10 @@
 # Purpose:		Project #2
 # Description:	README file for Project #2
 
-Built and tested with Python 2.7.x
-*** Must be built with Python 2.7
-Tested on eniac.cs.hunter.cuny.edu on 4/10/16
-Zipped with "zip (Archive Name) *.py *.txt -xr __MACOSX"
-
-
+### Build Instructions
+- Must be built with Python 2.7
+- Tested on eniac.cs.hunter.cuny.edu on 4/11/16
+- Zipped with "zip (Archive Name) *.py *.txt -xr __MACOSX"
 
 Build with:
 	python Main.py
