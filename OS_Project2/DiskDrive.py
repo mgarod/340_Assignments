@@ -35,6 +35,7 @@ class Disk:
     def append(self, element):
         if not self.get_busy_queue():  # If busy queue is empty, it item there
             self.get_busy_queue().append(element)
+            self.set_current_position()
         else:  # if busy, then put the element in the waiting queue
             self.get_waiting_queue().append(element)
             self.sort_waiting_queue()
@@ -46,13 +47,16 @@ class Disk:
         :return:
         """
         item = self.get_busy_queue().popleft()
-        self.current_position = item.cylinder
 
         if len(self.get_busy_queue()) == 0:
             self.switch_queues()  # change queues, and alternate direction
             self.sort_busy_queue()
 
+        self.set_current_position()
         return item
+
+    def set_current_position(self):
+        self.current_position = self.get_busy_queue()[0].cylinder
 
     def get_waiting_queue(self):
         return self.queues[(self.busy_queue + 1) % 2]
