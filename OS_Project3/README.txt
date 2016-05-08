@@ -8,7 +8,9 @@
 
 Built and tested with Python 2.7.x
 *** Must be built with Python 2.7
+
 Tested on eniac.cs.hunter.cuny.edu on 5/8/16
+
 Zipped with "zip Garod_Project3 *.py *.txt -xr __MACOSX"
 
 Build with:
@@ -18,3 +20,4 @@ Build with:
 Note:
     - The kill command is implemented as first accepting "K". The user will
     then be prompted to enter a PID to kill. Entering "K#" will not function.
+    - Killed processes do not go towards the system wide time accounting because killed processes neither 'terminate' nor 'complete'
