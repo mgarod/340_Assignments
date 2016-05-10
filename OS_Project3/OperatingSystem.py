@@ -459,6 +459,7 @@ class OS:
             n_frames_needed = self.calculate_frames_needed(next_job.mem_usage)
             self.give_n_frames_to_p(n_frames_needed, next_job)
             self.ReadyQueue.append(next_job)
+            self.load_next_jp_process()  # Recur to try and fit more in memory
 
     def kill(self):
         """

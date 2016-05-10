@@ -172,6 +172,7 @@ def print_devices(self, char):
             print
             for p in self.JobPool:
                 row_print_jp_pcb(p)
+                print
             print
         elif char == 'm':
             print

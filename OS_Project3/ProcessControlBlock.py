@@ -155,4 +155,5 @@ class PCB:
         frame = self.used_frames[logical / self.pg_size] * self.pg_size
         offset = logical % self.pg_size
         physical = valid.convert_dec_to_hex(frame + offset)
+        print "--- Physical memory access will be at {} (hex)".format(physical)
         self.memstart = physical
